@@ -16,6 +16,7 @@
         
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 13px; color: #b3b3b3;}
+        .label-with-btn { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         input[type="text"], input[type="url"], select, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #535c91; background-color: #0f3460; color: #fff; box-sizing: border-box; font-family: 'Poppins', sans-serif; font-size: 13px; }
         input[type="color"] { padding: 0; border: none; width: 40px; height: 30px; border-radius: 5px; cursor: pointer;}
         input[type="range"] { width: 100%; accent-color: #e50914; cursor: pointer; }
@@ -24,6 +25,13 @@
         .flex-row { display: flex; gap: 15px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
         .color-group { display: flex; align-items: center; background: #0f3460; padding: 5px 12px; border-radius: 8px; border: 1px solid #535c91; gap: 10px; flex: 1; justify-content: center;}
         
+        .upload-btn {
+            padding: 4px 10px; font-size: 11px; font-weight: 500;
+            background: #0f3460; border: 1px solid #535c91; color: #a1c4fd;
+            border-radius: 5px; cursor: pointer;
+        }
+        .upload-btn:hover { background: #535c91; }
+
         #previewFrame { width: 100%; flex: 1; border: 2px solid #535c91; border-radius: 10px; background-color: #000; }
         button.gen-btn { background: #e50914; color: #fff; padding: 15px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700; transition: 0.2s; letter-spacing: 1px;}
         button.gen-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(229, 9, 20, 0.6); }
@@ -37,16 +45,12 @@
     <div class="editor-panel">
         <h1>Spiderman Editor</h1>
         
+        <h3>Основные настройки</h3>
         <div class="flex-row">
             <div class="form-group" style="flex:1;">
                 <label>Язык интерфейса</label>
-                <select id="uiLang" onchange="debounceGenerate()">
-                    <option value="EN">English</option>
-                    <option value="RU">Русский</option>
-                    <option value="ES">Español</option>
-                    <option value="FR">Français</option>
-                    <option value="DE">Deutsch</option>
-                    <option value="IT">Italiano</option>
+                <select id="uiLang">
+                    <option value="EN">English</option><option value="RU">Русский</option><option value="ES">Español</option><option value="FR">Français</option><option value="DE">Deutsch</option><option value="IT">Italiano</option>
                 </select>
             </div>
             <div class="form-group" style="flex:1;">
@@ -58,87 +62,63 @@
         <h3>Оформление текста заданий</h3>
         <div class="flex-row">
             <div class="form-group" style="flex:1;">
-                <label>Шрифт (С поддержкой РУС)</label>
-                <select id="fontFamily" onchange="debounceGenerate()">
-                    <option value="'Montserrat', sans-serif">Montserrat (Современный)</option>
-                    <option value="'Roboto', sans-serif">Roboto (Классический)</option>
-                    <option value="'Russo One', sans-serif">Russo One (Жирный/Игровой)</option>
-                    <option value="'Caveat', cursive">Caveat (Игривый маркер)</option>
-                    <option value="'Neucha', cursive">Neucha (Комиксный)</option>
-                    <option value="'Bad Script', cursive">Bad Script (Рукописный)</option>
-                    <option value="'Kurale', serif">Kurale (Сказочный)</option>
-                    <option value="'Pacifico', cursive">Pacifico (Курсив)</option>
-                    <option value="'Comfortaa', sans-serif">Comfortaa (Круглый)</option>
+                <label>Шрифт</label>
+                <select id="fontFamily">
+                    <option value="'Montserrat', sans-serif">Montserrat</option><option value="'Roboto', sans-serif">Roboto</option><option value="'Russo One', sans-serif">Russo One</option><option value="'Caveat', cursive">Caveat</option><option value="'Neucha', cursive">Neucha</option><option value="'Bad Script', cursive">Bad Script</option><option value="'Kurale', serif">Kurale</option><option value="'Pacifico', cursive">Pacifico</option><option value="'Comfortaa', sans-serif">Comfortaa</option>
                 </select>
             </div>
-            <div class="color-group" style="margin-top: 8px;">
-                <label style="margin:0;">Цвет текста</label>
-                <input type="color" id="fontColor" value="#ffffff">
-            </div>
+            <div class="color-group" style="margin-top: 8px;"><label style="margin:0;">Цвет текста</label><input type="color" id="fontColor" value="#ffffff"></div>
         </div>
         <div class="form-group">
             <label>Размер шрифта: <span id="fSizeLbl">24</span>px</label>
-            <input type="range" id="fontSize" min="14" max="40" value="24" oninput="document.getElementById('fSizeLbl').innerText=this.value; debounceGenerate()">
+            <input type="range" id="fontSize" min="14" max="40" value="24" oninput="document.getElementById('fSizeLbl').innerText=this.value;">
         </div>
 
         <h3>Настройка заданий (Макс 15)</h3>
         <div class="form-group">
             <label>Тип игры</label>
-            <select id="gameMode" onchange="toggleTaskInputs(); debounceGenerate()">
-                <option value="quiz">Quiz (Вопросы с вариантами ответа)</option>
-                <option value="unscramble">Unscramble (Собрать предложение из слов)</option>
-                <option value="fill">Fill in the blank (Вписать нужное слово)</option>
-                <option value="discuss">Discussion (Только предложения для обсуждения)</option>
+            <select id="gameMode" onchange="toggleTaskInputs()">
+                <option value="quiz">Quiz (Вопросы с вариантами)</option><option value="unscramble">Unscramble (Собрать предложение)</option><option value="fill">Fill in the blank (Вписать слово)</option><option value="discuss">Discussion (Только предложения)</option>
             </select>
         </div>
-
         <div id="input-quiz">
             <div class="flex-row" style="align-items: flex-start;">
-                <div class="form-group" style="flex:1;">
-                    <label>ВОПРОСЫ (в столбик)</label>
-                    <textarea id="qList">He ... playing now.
-They ... go to school.
-What ... your name?</textarea>
-                </div>
-                <div class="form-group" style="flex:1.5;">
-                    <label>ОТВЕТЫ (Прав | Неправ | Неправ)</label>
-                    <textarea id="aList">is | are | am
-don't | doesn't | isn't
-is | are | am</textarea>
-                </div>
+                <div class="form-group" style="flex:1;"><label>ВОПРОСЫ</label><textarea id="qList">He ... playing now.&#10;They ... go to school.&#10;What ... your name?</textarea></div>
+                <div class="form-group" style="flex:1.5;"><label>ОТВЕТЫ (Прав | Неправ)</label><textarea id="aList">is | are | am&#10;don't | doesn't | isn't&#10;is | are | am</textarea></div>
             </div>
         </div>
-
-        <div id="input-simple" style="display:none;">
-            <div class="form-group">
-                <label>Предложения (в столбик)</label>
-                <textarea id="simpleList">I am a student.
-She likes reading books.
-We went to the park yesterday.</textarea>
-            </div>
-        </div>
-
+        <div id="input-simple" style="display:none;"><div class="form-group"><label>Предложения</label><textarea id="simpleList">I am a student.&#10;She likes reading books.&#10;We went to the park yesterday.</textarea></div></div>
         <div id="input-fill" style="display:none;">
             <div class="flex-row" style="align-items: flex-start;">
-                <div class="form-group" style="flex:1;">
-                    <label>ПРЕДЛОЖЕНИЯ С ПРОПУСКОМ</label>
-                    <textarea id="fillQList">He ___ playing now.
-They ___ go to school.
-What ___ your name?</textarea>
-                </div>
-                <div class="form-group" style="flex:1;">
-                    <label>ПРАВИЛЬНЫЙ ОТВЕТ (Одно слово)</label>
-                    <textarea id="fillAList">is
-don't
-is</textarea>
-                </div>
+                <div class="form-group" style="flex:1;"><label>ПРЕДЛОЖЕНИЯ С ПРОПУСКОМ</label><textarea id="fillQList">He ___ playing now.&#10;They ___ go to school.&#10;What ___ your name?</textarea></div>
+                <div class="form-group" style="flex:1;"><label>ПРАВИЛЬНЫЙ ОТВЕТ</label><textarea id="fillAList">is&#10;don't&#10;is</textarea></div>
             </div>
         </div>
 
-        <h3>Финал</h3>
+        <h3>Изображения и Финал</h3>
         <div class="form-group">
-            <label>Сообщение при победе</label>
-            <input type="text" id="winText" value="Awesome! You saved the city!">
+            <div class="label-with-btn"><label>Персонаж (Spiderman)</label><button class="upload-btn" onclick="document.getElementById('file-spider').click()">Загрузить</button></div>
+            <input type="text" id="imgSpider" value="https://i.postimg.cc/pTsshqrs/ko-FEJna.png">
+        </div>
+        <div class="flex-row">
+            <div class="form-group" style="flex:1;">
+                <div class="label-with-btn"><label>Картинка при победе</label><button class="upload-btn" onclick="document.getElementById('file-win').click()">Загрузить</button></div>
+                <input type="text" id="imgWin" value="https://i.postimg.cc/KzTnFfLK/pngwing-com-(1)8.png">
+            </div>
+            <div class="form-group" style="flex:1;">
+                 <label>Текст при победе</label>
+                 <input type="text" id="winText" value="Awesome! You saved the city!">
+            </div>
+        </div>
+        <div class="flex-row">
+            <div class="form-group" style="flex:1;">
+                <div class="label-with-btn"><label>Картинка при поражении</label><button class="upload-btn" onclick="document.getElementById('file-lose').click()">Загрузить</button></div>
+                <input type="text" id="imgLose" value="https://i.postimg.cc/26Y5b7M2/93083f64289a951284d34d32857268c5-ee427d88-0009-478d-b42d-af1c151b02e3.jpg">
+            </div>
+            <div class="form-group" style="flex:1;">
+                 <label>Текст при поражении</label>
+                 <input type="text" id="loseText" value="GAME OVER. TRY AGAIN">
+            </div>
         </div>
         
         <button class="gen-btn" id="copyBtn" onclick="copyCode()" style="width: 100%; margin-top:20px;">СГЕНЕРИРОВАТЬ И СКОПИРОВАТЬ</button>
@@ -151,7 +131,35 @@ is</textarea>
         <p class="copyright">©2026 Alina Pogudina @ELT_workshop</p>
     </div>
 
+    <!-- Hidden file inputs -->
+    <input type="file" id="file-spider" accept="image/*" style="display:none;">
+    <input type="file" id="file-win" accept="image/*" style="display:none;">
+    <input type="file" id="file-lose" accept="image/*" style="display:none;">
+
     <script>
+        function fileToBase64(file, callback) {
+            const reader = new FileReader();
+            reader.onload = () => callback(reader.result);
+            reader.onerror = error => console.error('Error reading file:', error);
+            reader.readAsDataURL(file);
+        }
+
+        function setupImageUpload(inputId, targetId) {
+            document.getElementById(inputId).addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    fileToBase64(file, (base64) => {
+                        document.getElementById(targetId).value = base64;
+                        debounceGenerate();
+                    });
+                }
+            });
+        }
+        
+        setupImageUpload('file-spider', 'imgSpider');
+        setupImageUpload('file-win', 'imgWin');
+        setupImageUpload('file-lose', 'imgLose');
+
         function toggleTaskInputs() {
             let mode = document.getElementById('gameMode').value;
             document.getElementById('input-quiz').style.display = mode === 'quiz' ? 'block' : 'none';
@@ -162,31 +170,10 @@ is</textarea>
         function getInputs() {
             let mode = document.getElementById('gameMode').value;
             let tasks = [];
-
-            if(mode === 'quiz') {
-                let qLines = document.getElementById('qList').value.split('\n').map(s=>s.trim()).filter(s=>s);
-                let aLines = document.getElementById('aList').value.split('\n').map(s=>s.trim()).filter(s=>s);
-                let count = Math.min(qLines.length, aLines.length);
-                for(let i=0; i<count; i++) {
-                    let parts = aLines[i].split('|').map(s=>s.trim()).filter(s=>s);
-                    if(parts.length > 0) {
-                        tasks.push({ q: qLines[i], c: parts[0], w: parts.slice(1) });
-                    }
-                }
-            } else if (mode === 'fill') {
-                let qLines = document.getElementById('fillQList').value.split('\n').map(s=>s.trim()).filter(s=>s);
-                let aLines = document.getElementById('fillAList').value.split('\n').map(s=>s.trim()).filter(s=>s);
-                let count = Math.min(qLines.length, aLines.length);
-                for(let i=0; i<count; i++) {
-                    tasks.push({ q: qLines[i], c: aLines[i] });
-                }
-            } else {
-                let lines = document.getElementById('simpleList').value.split('\n').map(s=>s.trim()).filter(s=>s);
-                lines.forEach(line => tasks.push({ q: line }));
-            }
-
-            if(tasks.length === 0) tasks = [{q: "No tasks configured!", c: "Ok", w: []}];
-            tasks = tasks.slice(0, 15);
+            if(mode === 'quiz') { let q=document.getElementById('qList').value.split('\n').map(s=>s.trim()).filter(s=>s),a=document.getElementById('aList').value.split('\n').map(s=>s.trim()).filter(s=>s); for(let i=0; i<Math.min(q.length, a.length); i++) { let p=a[i].split('|').map(s=>s.trim()).filter(s=>s); if(p.length>0) tasks.push({q:q[i],c:p[0],w:p.slice(1)}); }}
+            else if (mode === 'fill') { let q=document.getElementById('fillQList').value.split('\n').map(s=>s.trim()).filter(s=>s),a=document.getElementById('fillAList').value.split('\n').map(s=>s.trim()).filter(s=>s); for(let i=0; i<Math.min(q.length,a.length); i++) tasks.push({q:q[i],c:a[i]}); }
+            else { document.getElementById('simpleList').value.split('\n').map(s=>s.trim()).filter(s=>s).forEach(l=>tasks.push({q:l}));}
+            if(tasks.length===0) tasks=[{q:"No tasks configured!", c:"Ok", w:[]}];
 
             return {
                 lang: document.getElementById('uiLang').value,
@@ -195,81 +182,58 @@ is</textarea>
                 fontColor: document.getElementById('fontColor').value,
                 fontSize: document.getElementById('fontSize').value,
                 mode: mode,
-                tasks: tasks,
-                imgSpider: "https://i.postimg.cc/pTsshqrs/ko-FEJna.png",
-                imgGranny: "https://i.postimg.cc/26Y5b7M2/93083f64289a951284d34d32857268c5-ee427d88-0009-478d-b42d-af1c151b02e3.jpg",
-                imgWin: "https://i.postimg.cc/KzTnFfLK/pngwing-com-(1)8.png",
-                bgUrl: "https://i.postimg.cc/QtwztfHc/Alice-in-Wonderland-A1-by-ELT-workshop.png",
-                winText: document.getElementById('winText').value
+                tasks: tasks.slice(0, 15),
+                imgSpider: document.getElementById('imgSpider').value,
+                imgLose: document.getElementById('imgLose').value,
+                imgWin: document.getElementById('imgWin').value,
+                winText: document.getElementById('winText').value,
+                loseText: document.getElementById('loseText').value
             };
         }
 
         function generateCode() {
             const conf = getInputs();
+            const bgUrl = "https://i.postimg.cc/QtwztfHc/Alice-in-Wonderland-A1-by-ELT-workshop.png";
 
             const safeHtmlCode = `<!DOCTYPE html>
 <html lang="${conf.lang.toLowerCase()}">
 <head>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Bad+Script&family=Caveat:wght@700&family=Comfortaa:wght@700&family=Kurale&family=Montserrat:wght@700;800&family=Neucha&family=Pacifico&family=Roboto:wght@700&family=Russo+One&display=swap');
-    
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
-    
-    #elt-app { position: absolute; inset: 0; width: 100%; height: 100%; background: url('${conf.bgUrl}') center/100% 100% no-repeat; user-select: none; box-sizing: border-box; overflow: hidden; font-family: 'Montserrat', sans-serif;}
+    #elt-app { position: absolute; inset: 0; width: 100%; height: 100%; background: url('${bgUrl}') center/100% 100% no-repeat; user-select: none; box-sizing: border-box; overflow: hidden; font-family: 'Montserrat', sans-serif;}
     #elt-app:focus { outline: none; }
     * { box-sizing: border-box; }
-
     .elt-top-bar { position: absolute; top: 35px; right: 25px; left: 20px; display: flex; justify-content: space-between; z-index: 20; pointer-events: none;}
     .elt-lives { display: flex; align-items: center; }
     .elt-heart { width: 30px; height: 30px; background-color: #ff4757; display: inline-block; position: relative; margin: 0 15px !important; clip-path: polygon(10% 0, 40% 0, 50% 10%, 60% 0, 90% 0, 100% 10%, 100% 40%, 50% 90%, 0 40%, 0 10%); transform: scale(1.1); transition: 0.3s;}
-
-    .elt-dot { 
-        position: absolute; width: 14px; height: 14px; background: #ffd700; border-radius: 50%;
-        box-shadow: 0 0 10px #ffd700, 0 0 20px #ff8c00;
-        transform: translate(-50%, -50%); z-index: 5;
-        animation: dotFlicker 1.5s infinite alternate; transition: 0.4s;
-    }
+    .elt-dot { position: absolute; width: 14px; height: 14px; background: #ffd700; border-radius: 50%; box-shadow: 0 0 10px #ffd700, 0 0 20px #ff8c00; transform: translate(-50%, -50%); z-index: 5; animation: dotFlicker 1.5s infinite alternate; transition: 0.4s; }
     .elt-dot.done { background: #555; box-shadow: inset 0 0 5px #000; animation: none; }
-    @keyframes dotFlicker {
-        from { opacity: 0.5; transform: translate(-50%, -50%) scale(0.8); }
-        to { opacity: 1; transform: translate(-50%, -50%) scale(1.3); box-shadow: 0 0 15px #ffd700, 0 0 30px #ff8c00; }
-    }
-
+    @keyframes dotFlicker { from { opacity: 0.5; transform: translate(-50%, -50%) scale(0.8); } to { opacity: 1; transform: translate(-50%, -50%) scale(1.3); box-shadow: 0 0 15px #ffd700, 0 0 30px #ff8c00; } }
     #elt-space-hint { position: absolute; background: #fff; color: #000; font-family: 'Montserrat', sans-serif; font-weight: 800; padding: 4px 10px; border-radius: 5px; font-size: 14px; transform: translate(-50%, -160%); display: none; z-index: 15; pointer-events: none; box-shadow: 0 4px 10px rgba(0,0,0,0.5);}
-
     #elt-spidey { position: absolute; width: 65px; height: 65px; background: url('${conf.imgSpider}') center/contain no-repeat; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; z-index: 10; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); display: none;}
     #elt-spidey.flip { transform: translate(-50%, -50%) scaleX(-1); }
-
     .elt-task-board { position: absolute; top: 22%; right: 20px; width: 40vw; max-width: 500px; min-height: 150px; background: rgba(20, 20, 20, 0.9); border: 4px solid #ccc; border-radius: 20px; box-shadow: 0 0 25px rgba(204, 204, 204, 0.6), inset 0 0 15px rgba(204, 204, 204, 0.4); padding: 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 20px; opacity: 0; pointer-events: none; transition: transform 0.3s, opacity 0.3s; backdrop-filter: blur(5px); z-index: 40;}
     .elt-task-board.show { opacity: 1; pointer-events: auto; transform: scale(1); }
-    
     @keyframes errorShake { 0%, 100% { transform: translateX(0) scale(1); } 20% { transform: translateX(-15px) scale(1); } 40% { transform: translateX(15px) scale(1); } 60% { transform: translateX(-15px) scale(1); } 80% { transform: translateX(15px) scale(1); } }
     .elt-task-board.error-state { animation: errorShake 0.5s ease-in-out !important; border-color: #ff4757 !important; box-shadow: 0 0 30px rgba(255, 71, 87, 0.8), inset 0 0 20px rgba(255, 71, 87, 0.5) !important; }
-
     @keyframes explodeBoard { 0% { transform: scale(1); opacity: 1; filter: brightness(1); } 30% { transform: scale(1.1); filter: brightness(1.5) contrast(1.2); box-shadow: 0 0 40px #ffd700; border-color: #ffd700;} 100% { transform: scale(0); opacity: 0; filter: brightness(2); } }
     .elt-task-board.exploding { animation: explodeBoard 0.5s ease-out forwards !important; pointer-events: none !important; }
-
     .elt-fragment { position: absolute; width: 10px; height: 10px; border-radius: 2px; pointer-events: none; z-index: 100; animation: fragmentFly 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
     @keyframes fragmentFly { 0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; } 100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(var(--rot)) scale(0); opacity: 0; } }
-
     .elt-question { font-family: ${conf.fontFamily}; font-size: ${conf.fontSize}px; color: ${conf.fontColor}; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); line-height: 1.4;}
     .elt-ans-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; width: 100%;}
-    
     .elt-btn-ans, .elt-btn-main { appearance: none !important; -webkit-appearance: none !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; text-transform: uppercase !important; letter-spacing: 1px !important; line-height: normal !important; text-align: center !important; text-decoration: none !important; }
     .elt-btn-ans { background-color: rgba(255,255,255,0.1) !important; color: #ffffff !important; border: 2px solid #ccc !important; padding: 10px 20px !important; border-radius: 10px !important; font-family: ${conf.fontFamily} !important; font-size: calc(${conf.fontSize}px * 0.85) !important; cursor: pointer !important; transition: all 0.2s !important; box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;}
     .elt-btn-ans:hover { background-color: #555 !important; transform: scale(1.05) !important; border-color: #fff !important;}
     .elt-btn-main { background-color: #e50914 !important; color: #ffffff !important; font-family: 'Montserrat', sans-serif !important; font-weight: 800 !important; padding: 15px 40px !important; font-size: 18px !important; border: 3px solid #e0e0e0 !important; border-radius: 12px !important; cursor: pointer !important; transition: all 0.2s !important; box-shadow: 0 0 15px rgba(224, 224, 224, 0.5), 0 4px 10px rgba(0,0,0,0.6) !important;}
     .elt-btn-main:hover { background-color: #ff4757 !important; transform: scale(1.05) !important; border-color: #ffffff !important; box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 6px 15px rgba(0,0,0,0.7) !important;}
-
-    /* ПОЛЕ ВВОДА ДЛЯ РЕЖИМА FILL */
     .elt-input-text { appearance: none !important; -webkit-appearance: none !important; width: 80% !important; max-width: 300px !important; padding: 12px 20px !important; font-family: 'Montserrat', sans-serif !important; font-size: 20px !important; font-weight: 700 !important; color: #fff !important; background: rgba(0,0,0,0.6) !important; border: 2px solid #ffd700 !important; border-radius: 10px !important; text-align: center !important; margin-bottom: 10px !important; box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 10px rgba(255,215,0,0.3) !important; outline: none !important; transition: 0.3s !important;}
     .elt-input-text:focus { box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 20px rgba(255,215,0,0.8) !important; border-color: #fff !important; }
-
     .elt-word-bank, .elt-word-target { display: flex !important; flex-wrap: wrap !important; gap: 10px !important; align-items: center !important; justify-content: center !important; width: 100%; min-height: 60px; padding: 15px; border: 2px dashed #666; border-radius: 10px;}
     .elt-word-target { border-color: #a1c4fd; background: rgba(161, 196, 253, 0.1);}
     .elt-word { background: rgba(0,0,0,0.6) !important; color: #ffffff !important; padding: 8px 18px !important; margin: 5px !important; border-radius: 8px !important; font-family: 'Montserrat', sans-serif !important; font-weight: 700 !important; cursor: pointer !important; transition: 0.2s !important; user-select: none !important; border: 2px solid #ffd700 !important; box-shadow: 0 0 10px rgba(255, 215, 0, 0.6), inset 0 0 10px rgba(255, 215, 0, 0.2) !important; height: auto !important; line-height: normal !important; display: inline-block !important;}
     .elt-word:hover { transform: translateY(-3px) !important; box-shadow: 0 0 15px #ffd700, inset 0 0 15px #ffd700 !important; background: rgba(255, 215, 0, 0.2) !important; }
-
     .elt-controls { position: absolute; bottom: 20px; right: 5%; display: flex; gap: 20px; align-items: center; z-index: 30; opacity: 0.6; transition: 0.2s;}
     .elt-controls:hover { opacity: 1; }
     .elt-dpad { width: 140px; height: 140px; display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 4px; }
@@ -278,19 +242,16 @@ is</textarea>
     .up { grid-column: 2; grid-row: 1; } .left { grid-column: 1; grid-row: 2; } .right { grid-column: 3; grid-row: 2; } .down { grid-column: 2; grid-row: 3; }
     .elt-space-btn { width: 80px; height: 80px; border-radius: 50%; background: rgba(229, 9, 20, 0.5); border: 3px solid rgba(255,255,255,0.4); color: #ffffff !important; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; backdrop-filter: blur(2px);}
     .elt-space-btn:active { transform: scale(0.9); background: rgba(229, 9, 20, 0.8); }
-
     #screen-start { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50; padding: 20px;}
     .elt-title-huge { background: rgba(229, 9, 20, 0.95); color: #ffffff !important; font-weight: 800; font-size: clamp(24px, 4vw, 50px); padding: 20px 40px !important; border-radius: 20px; border: 4px solid #fff; margin-bottom: 40px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; max-width: 95%; line-height: normal !important; word-wrap: break-word;}
     .elt-btn-huge { appearance: none !important; -webkit-appearance: none !important; background-color: #ffffff !important; color: #e50914 !important; font-family: 'Montserrat', sans-serif !important; font-weight: 800 !important; font-size: clamp(20px, 3vw, 30px) !important; padding: 20px 50px !important; border: none !important; border-radius: 40px !important; cursor: pointer !important; transition: all 0.2s !important; box-shadow: 0 5px 15px rgba(0,0,0,0.5) !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; line-height: normal !important; text-transform: uppercase !important;}
     .elt-btn-huge:hover { transform: scale(1.1) !important; background-color: #f0f0f0 !important;}
-
     #screen-win { position: absolute; inset: 0; background: radial-gradient(circle, #ffdf00 0%, #b8860b 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 60; transition: 0.5s; overflow: hidden;}
     .elt-win-img { width: 280px; height: 280px; object-fit: contain; filter: drop-shadow(0 0 25px rgba(255,255,255,0.9)); animation: floatImg 3s ease-in-out infinite; z-index: 2; margin-bottom: 20px;}
     .elt-win-text { background: rgba(229, 9, 20, 0.95); color: #ffffff !important; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: clamp(24px, 4vw, 50px); padding: 20px 40px !important; border-radius: 20px; border: 4px solid #fff; margin-bottom: 40px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; max-width: 95%; line-height: normal !important; word-wrap: break-word; z-index: 2;}
     @keyframes floatImg { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
     .elt-gold-spark { position: absolute; width: 6px; height: 6px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px #fff, 0 0 20px #ffd700, 0 0 30px #ff8c00; animation: sparkFade 1s linear forwards; pointer-events: none; z-index: 1;}
     @keyframes sparkFade { 0% { transform: scale(0) translateY(0); opacity: 1; } 50% { transform: scale(1.5) translateY(-30px); opacity: 1; } 100% { transform: scale(0) translateY(-60px); opacity: 0; } }
-
     #screen-over { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 60; transition: 0.5s; padding: 20px;}
     .elt-lose-img { width: 330px; height: 330px; object-fit: cover; border-radius: 20px; border: 5px solid #e50914; margin-bottom: 25px; box-shadow: 0 0 30px rgba(229,9,20,0.5); animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .elt-lose-text { color: #ffffff !important; font-weight: 800; font-size: min(6vw, 36px); margin-bottom: 30px; text-align: center; font-family: 'Montserrat', sans-serif;}
@@ -299,461 +260,70 @@ is</textarea>
 </style>
 </head>
 <body>
-
 <div id="elt-app" tabindex="0">
-    <div class="elt-top-bar">
-        <div style="opacity: 0;">Spacer</div>
-        <div class="elt-lives" id="elt-lives"></div>
-    </div>
-    <div id="dots-container"></div>
-    <div id="elt-spidey"></div>
-    <div id="elt-space-hint">SPACE</div>
-
+    <div class="elt-top-bar"><div style="opacity:0;"></div><div class="elt-lives" id="elt-lives"></div></div>
+    <div id="dots-container"></div><div id="elt-spidey"></div><div id="elt-space-hint">SPACE</div>
     <div class="elt-controls">
         <div class="elt-dpad">
-            <div class="elt-dbtn up" onpointerdown="game.move(0, -1)" onpointerup="game.stopMove()" onpointerleave="game.stopMove()">⬆️</div>
-            <div class="elt-dbtn left" onpointerdown="game.move(-1, 0)" onpointerup="game.stopMove()" onpointerleave="game.stopMove()">⬅️</div>
-            <div class="elt-dbtn right" onpointerdown="game.move(1, 0)" onpointerup="game.stopMove()" onpointerleave="game.stopMove()">➡️</div>
-            <div class="elt-dbtn down" onpointerdown="game.move(0, 1)" onpointerup="game.stopMove()" onpointerleave="game.stopMove()">⬇️</div>
+            <div class="elt-dbtn up" onpointerdown="game.move(0,-1)" onpointerup="game.stopMove()" onpointerleave="game.stopMove()">⬆️</div>
+            <div class="elt-dbtn left" onpointerdown="game.move(-1,0)" onpointerup="game.stopMove()" onpointerleave="game.stopMove()">⬅️</div>
+            <div class="elt-dbtn right" onpointerdown="game.move(1,0)" onpointerup="game.stopMove()" onpointerleave="game.stopMove()">➡️</div>
+            <div class="elt-dbtn down" onpointerdown="game.move(0,1)" onpointerup="game.stopMove()" onpointerleave="game.stopMove()">⬇️</div>
         </div>
         <div class="elt-space-btn" onclick="game.triggerSpace()">SPACE</div>
     </div>
-
-    <div class="elt-task-board" id="board-task">
-        <div class="elt-question" id="lbl-question">Question here</div>
-        <div id="box-answers"></div>
-    </div>
-
-    <div id="screen-start">
-        <div class="elt-title-huge">${conf.title}</div>
-        <button class="elt-btn-huge" id="btn-start">START</button>
-    </div>
-
-    <div id="screen-over" class="elt-hidden">
-        <img src="${conf.imgGranny}" class="elt-lose-img">
-        <div class="elt-lose-text">GAME OVER. TRY AGAIN</div>
-        <button class="elt-btn-main" id="btn-try">RESTART</button>
-    </div>
-
-    <div id="screen-win" class="elt-hidden">
-        <img src="${conf.imgWin}" class="elt-win-img">
-        <div class="elt-win-text">${conf.winText}</div>
-        <button class="elt-btn-main" id="btn-win-restart" style="position: relative; z-index: 10;">PLAY AGAIN</button>
-    </div>
-
+    <div class="elt-task-board" id="board-task"><div class="elt-question" id="lbl-question"></div><div id="box-answers"></div></div>
+    <div id="screen-start"><div class="elt-title-huge">${conf.title}</div><button class="elt-btn-huge" id="btn-start"></button></div>
+    <div id="screen-over" class="elt-hidden"><img src="${conf.imgLose}" class="elt-lose-img"><div class="elt-lose-text">${conf.loseText}</div><button class="elt-btn-main" id="btn-try"></button></div>
+    <div id="screen-win" class="elt-hidden"><img src="${conf.imgWin}" class="elt-win-img"><div class="elt-win-text">${conf.winText}</div><button class="elt-btn-main" id="btn-win-restart" style="position:relative;z-index:10;"></button></div>
 <script>
 (function(){
-    const dict = {
-        EN: { start: "START", over: "GAME OVER. TRY AGAIN", try: "RESTART", check: "CHECK", next: "NEXT", unscramble: "Put the words in the right order", playagain: "PLAY AGAIN" },
-        RU: { start: "ИГРАТЬ", over: "ИГРА ОКОНЧЕНА", try: "ЗАНОВО", check: "ПРОВЕРИТЬ", next: "ДАЛЕЕ", unscramble: "Расставьте слова в правильном порядке", playagain: "ИГРАТЬ ЕЩЕ РАЗ" },
-        ES: { start: "JUGAR", over: "FIN DEL JUEGO", try: "REINICIAR", check: "COMPROBAR", next: "SIGUIENTE", unscramble: "Pon las palabras en el orden correcto", playagain: "JUGAR DE NUEVO" },
-        FR: { start: "JOUER", over: "FIN DE PARTIE", try: "RECOMMENCER", check: "VÉRIFIER", next: "SUIVANT", unscramble: "Mettez les mots dans le bon ordre", playagain: "REJOUER" },
-        DE: { start: "START", over: "SPIEL VORBEI", try: "NEUSTART", check: "PRÜFEN", next: "WEITER", unscramble: "Bringen Sie die Wörter in die richtige Reihenfolge", playagain: "NOCHMAL SPIELEN" },
-        IT: { start: "INIZIA", over: "FINE GIOCO", try: "RIAVVIA", check: "CONTROLLA", next: "AVANTI", unscramble: "Metti le parole nel giusto ordine", playagain: "GIOCA DI NUOVO" }
-    };
-    const lang = dict['${conf.lang}'] || dict['EN'];
-    document.getElementById('btn-start').innerText = lang.start;
-    document.querySelector('.elt-lose-text').innerText = lang.over;
-    document.getElementById('btn-try').innerText = lang.try;
-    document.getElementById('btn-win-restart').innerText = lang.playagain;
-
-    const MODE = '${conf.mode}';
-    const TASKS = ${JSON.stringify(conf.tasks)};
-
-    const GRID = [
-        {x: 28.5, y: 18.5}, {x: 38, y: 18.5}, {x: 46.5, y: 18.5}, 
-        {x: 28.5, y: 34},   {x: 38, y: 34},   {x: 46.5, y: 34},   
-        {x: 28.5, y: 50.5}, {x: 38, y: 50.5}, {x: 46.5, y: 50.5}, 
-        {x: 28.5, y: 67.5}, {x: 38, y: 67.5}, {x: 46.5, y: 67.5}, 
-        {x: 28.5, y: 83.5}, {x: 38, y: 83.5}, {x: 46.5, y: 83.5}  
-    ];
-
+    const dict = { EN: { start: "START", try: "RESTART", check: "CHECK", next: "NEXT", unscramble: "Put the words in the right order", playagain: "PLAY AGAIN" }, RU: { start: "ИГРАТЬ", try: "ЗАНОВО", check: "ПРОВЕРИТЬ", next: "ДАЛЕЕ", unscramble: "Расставьте слова в правильном порядке", playagain: "ИГРАТЬ ЕЩЕ РАЗ" }, ES: { start: "JUGAR", try: "REINICIAR", check: "COMPROBAR", next: "SIGUIENTE", unscramble: "Pon las palabras en el orden correcto", playagain: "JUGAR DE NUEVO" }, FR: { start: "JOUER", try: "RECOMMENCER", check: "VÉRIFIER", next: "SUIVANT", unscramble: "Mettez les mots dans le bon ordre", playagain: "REJOUER" }, DE: { start: "START", try: "NEUSTART", check: "PRÜFEN", next: "WEITER", unscramble: "Bringen Sie die Wörter in die richtige Reihenfolge", playagain: "NOCHMAL SPIELEN" }, IT: { start: "INIZIA", try: "RIAVVIA", check: "CONTROLLA", next: "AVANTI", unscramble: "Metti le parole nel giusto ordine", playagain: "GIOCA DI NUOVO" }};
+    const lang = dict['${conf.lang}'] || dict.EN;
+    document.getElementById('btn-start').innerText=lang.start; document.getElementById('btn-try').innerText=lang.try; document.getElementById('btn-win-restart').innerText=lang.playagain;
+    const MODE = '${conf.mode}'; const TASKS = ${JSON.stringify(conf.tasks)};
+    const GRID = [{x:28.5,y:18.5},{x:38,y:18.5},{x:46.5,y:18.5},{x:28.5,y:34},{x:38,y:34},{x:46.5,y:34},{x:28.5,y:50.5},{x:38,y:50.5},{x:46.5,y:50.5},{x:28.5,y:67.5},{x:38,y:67.5},{x:46.5,y:67.5},{x:28.5,y:83.5},{x:38,y:83.5},{x:46.5,y:83.5}];
     const game = {
-        lives: 3, isPlaying: false, isActive: false, tasksCompleted: 0,
-        spideyX: 38, spideyY: 95, 
-        moveX: 0, moveY: 0, fwInterval: null, focusInterval: null,
-        spideyEl: document.getElementById('elt-spidey'),
-        hintEl: document.getElementById('elt-space-hint'),
-        appArea: document.getElementById('elt-app'),
-        boardTask: document.getElementById('board-task'),
-        dotsContainer: document.getElementById('dots-container'),
-        
-        allDots: [], currentNearDot: null,
-        
-        init: function() {
-            document.getElementById('btn-start').addEventListener('click', () => this.startGame());
-            document.getElementById('btn-try').addEventListener('click', () => this.startGame());
-            document.getElementById('btn-win-restart').addEventListener('click', () => this.startGame());
-            
-            const blockKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Spacebar'];
-            
-            const handleKeyDown = (e) => {
-                const isInput = e.target.tagName && e.target.tagName.toLowerCase() === 'input';
-                
-                if (blockKeys.includes(e.key) || blockKeys.includes(e.code)) {
-                    if (!isInput) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
-                }
-                
-                if (isInput || !this.isPlaying) return;
-                
-                if (e.key === 'ArrowUp' || e.code === 'ArrowUp') this.move(0, -1);
-                if (e.key === 'ArrowDown' || e.code === 'ArrowDown') this.move(0, 1);
-                if (e.key === 'ArrowLeft' || e.code === 'ArrowLeft') this.move(-1, 0);
-                if (e.key === 'ArrowRight' || e.code === 'ArrowRight') this.move(1, 0);
-                if (e.key === ' ' || e.code === 'Space') this.triggerSpace();
-            };
-
-            const handleKeyUp = (e) => {
-                const isInput = e.target.tagName && e.target.tagName.toLowerCase() === 'input';
-                if (blockKeys.includes(e.key) || blockKeys.includes(e.code)) {
-                    if (!isInput) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        this.stopMove();
-                    }
-                }
-            };
-
-            // Полный перехват кнопок
-            window.addEventListener('keydown', handleKeyDown, {passive: false, capture: true});
-            window.addEventListener('keyup', handleKeyUp, {passive: false, capture: true});
-
-            // Восстанавливаем фокус при клике на игру (безопасно для редактора)
-            this.appArea.addEventListener('pointerdown', (e) => {
-                if (e.target.tagName !== 'INPUT') {
-                    window.focus();
-                    this.appArea.focus();
-                }
-            });
+        lives:3,isPlaying:false,isActive:false,tasksCompleted:0,spideyX:38,spideyY:95,moveX:0,moveY:0,fwInterval:null,focusInterval:null,allDots:[],currentNearDot:null,
+        spideyEl:document.getElementById('elt-spidey'),hintEl:document.getElementById('elt-space-hint'),appArea:document.getElementById('elt-app'),boardTask:document.getElementById('board-task'),dotsContainer:document.getElementById('dots-container'),
+        init:function(){
+            document.getElementById('btn-start').onclick=()=>this.startGame(); document.getElementById('btn-try').onclick=()=>this.startGame(); document.getElementById('btn-win-restart').onclick=()=>this.startGame();
+            const keys=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','Spacebar'];
+            const onKDown=(e)=>{let i=e.target.tagName&&e.target.tagName.toLowerCase()==='input';if(keys.includes(e.key)||keys.includes(e.code)){if(!i){e.preventDefault();e.stopPropagation()}}if(i||!this.isPlaying)return;if(e.key==='ArrowUp'||e.code==='ArrowUp')this.move(0,-1);if(e.key==='ArrowDown'||e.code==='ArrowDown')this.move(0,1);if(e.key==='ArrowLeft'||e.code==='ArrowLeft')this.move(-1,0);if(e.key==='ArrowRight'||e.code==='ArrowRight')this.move(1,0);if(e.key===' '||e.code==='Space')this.triggerSpace()};
+            const onKUp=(e)=>{let i=e.target.tagName&&e.target.tagName.toLowerCase()==='input';if((keys.includes(e.key)||keys.includes(e.code))&&!i){e.preventDefault();e.stopPropagation();this.stopMove()}};
+            window.addEventListener('keydown',onKDown,{passive:false,capture:true}); window.addEventListener('keyup',onKUp,{passive:false,capture:true});
+            this.appArea.addEventListener('pointerdown',(e)=>{if(e.target.tagName!=='INPUT'){window.focus();this.appArea.focus()}})
         },
-
-        startGame: function() {
-            // Убираем фокус со стартовых кнопок
-            document.getElementById('btn-start').blur();
-            document.getElementById('btn-try').blur();
-            document.getElementById('btn-win-restart').blur();
-            
-            window.focus();
-            this.appArea.focus(); 
-            
-            // Включаем Умный перехват фокуса (работает только пока идет игра)
-            this.isActive = true;
-            clearInterval(this.focusInterval);
-            this.focusInterval = setInterval(() => {
-                if (this.isActive) {
-                    const active = document.activeElement;
-                    if (active && active.tagName.toLowerCase() === 'input') return; // Не мешаем писать текст
-                    window.focus();
-                    this.appArea.focus();
-                }
-            }, 250);
-            
-            document.getElementById('screen-start').style.display = 'none';
-            document.getElementById('screen-over').classList.add('elt-hidden');
-            document.getElementById('screen-win').classList.add('elt-hidden');
-            clearInterval(this.fwInterval);
-            
-            this.lives = 3;
-            this.tasksCompleted = 0;
-            this.updateLives();
-            this.spideyX = 38; 
-            this.spideyY = 95;
-            this.spideyEl.style.display = 'block'; 
-            this.updateSpidey();
-            this.generateDots();
-            this.boardTask.classList.remove('show');
-            this.boardTask.classList.remove('error-state');
-            this.boardTask.classList.remove('exploding');
-            this.isPlaying = true;
-            this.loop();
+        startGame:function(){
+            document.activeElement.blur(); window.focus(); this.appArea.focus(); this.isActive=true; clearInterval(this.focusInterval);
+            this.focusInterval=setInterval(()=>{if(this.isActive){let a=document.activeElement;if(a&&a.tagName.toLowerCase()==='input')return;window.focus();this.appArea.focus()}},250);
+            document.getElementById('screen-start').style.display='none'; document.getElementById('screen-over').classList.add('elt-hidden'); document.getElementById('screen-win').classList.add('elt-hidden'); clearInterval(this.fwInterval);
+            this.lives=3; this.tasksCompleted=0; this.updateLives(); this.spideyX=38; this.spideyY=95; this.spideyEl.style.display='block'; this.updateSpidey(); this.generateDots(); this.boardTask.classList.remove('show','error-state','exploding'); this.isPlaying=true; this.loop();
         },
-
-        updateLives: function() {
-            let html = "";
-            for(let i=0; i<this.lives; i++) html += '<div class="elt-heart"></div>';
-            document.getElementById('elt-lives').innerHTML = html;
+        updateLives:function(){let h="";for(let i=0;i<this.lives;i++)h+='<div class="elt-heart"></div>';document.getElementById('elt-lives').innerHTML=h},
+        generateDots:function(){
+            this.dotsContainer.innerHTML='';this.allDots=[];let s=[...GRID].sort(()=>.5-Math.random());
+            s.forEach((c,i)=>{let d=document.createElement('div');d.className='elt-dot';d.style.left=c.x+'%';d.style.top=c.y+'%';let r=i<TASKS.length;let t=r?TASKS[i]:null;let o={el:d,x:c.x,y:c.y,isReal:r,task:t,done:false};this.allDots.push(o);this.dotsContainer.appendChild(d)})
         },
-
-        generateDots: function() {
-            this.dotsContainer.innerHTML = '';
-            this.allDots = [];
-            let shuffledGrid = [...GRID].sort(() => Math.random() - 0.5);
-            shuffledGrid.forEach((coord, i) => {
-                let dot = document.createElement('div');
-                dot.className = 'elt-dot';
-                dot.style.left = coord.x + '%';
-                dot.style.top = coord.y + '%';
-                let isRealTask = (i < TASKS.length);
-                let taskData = isRealTask ? TASKS[i] : null;
-                let dotObj = { el: dot, x: coord.x, y: coord.y, isReal: isRealTask, task: taskData, done: false };
-                this.allDots.push(dotObj);
-                this.dotsContainer.appendChild(dot);
-            });
+        move:function(dx,dy){if(!this.isPlaying)return;this.moveX=dx;this.moveY=dy;if(dx===-1)this.spideyEl.classList.add('flip');if(dx===1)this.spideyEl.classList.remove('flip')},
+        stopMove:function(){this.moveX=0;this.moveY=0},
+        triggerSpace:function(){if(!this.isPlaying||!this.currentNearDot)return;let d=this.currentNearDot;if(d.done)return;if(!d.isReal){d.done=true;d.el.classList.add('done');this.hintEl.style.display='none';return}this.isPlaying=false;this.stopMove();this.hintEl.style.display='none';this.openTask(d.task,d)},
+        loop:function(){if(!this.isPlaying)return;if(this.moveX!==0||this.moveY!==0){this.spideyX+=this.moveX*.5;this.spideyY+=this.moveY*.5;if(this.spideyX<25.5)this.spideyX=25.5;if(this.spideyX>48.5)this.spideyX=48.5;if(this.spideyY<17.5)this.spideyY=17.5;if(this.spideyY>95)this.spideyY=95;this.updateSpidey();this.checkProximity()}requestAnimationFrame(()=>this.loop())},
+        updateSpidey:function(){this.spideyEl.style.left=this.spideyX+'%';this.spideyEl.style.top=this.spideyY+'%';this.hintEl.style.left=this.spideyX+'%';this.hintEl.style.top=this.spideyY+'%'},
+        checkProximity:function(){let f=null;this.allDots.forEach(d=>{if(d.done)return;let t=Math.hypot(this.spideyX-d.x,this.spideyY-d.y);if(t<5)f=d});this.currentNearDot=f;this.hintEl.style.display=f?'block':'none';if(this.tasksCompleted>=TASKS.length)this.win()},
+        openTask:function(t,d){
+            this.boardTask.classList.remove('error-state');this.boardTask.classList.add('show');let a=document.getElementById('box-answers');a.innerHTML='';
+            if(MODE==='discuss'){document.getElementById('lbl-question').innerText=t.q;let b=document.createElement('button');b.className='elt-btn-main';b.innerText=lang.next;b.onclick=()=>this.taskSuccess(d);a.appendChild(b)}
+            else if(MODE==='quiz'){document.getElementById('lbl-question').innerText=t.q;let g=document.createElement('div');g.className='elt-ans-grid';let o=[{t:t.c,corr:true}];t.w.forEach(w=>o.push({t:w,corr:false}));o.sort(()=>.5-Math.random());o.forEach(opt=>{let b=document.createElement('button');b.className='elt-btn-ans';b.innerText=opt.t;b.onclick=()=>{if(opt.corr)this.taskSuccess(d);else this.taskFail()};g.appendChild(b)});a.appendChild(g)}
+            else if(MODE==='fill'){document.getElementById('lbl-question').innerText=t.q;let i=document.createElement('input');i.type='text';i.className='elt-input-text';i.autocomplete='off';i.spellcheck=false;let c=document.createElement('button');c.className='elt-btn-main';c.innerText=lang.check;const ch=()=>{let u=i.value.trim().toLowerCase(),r=t.c.trim().toLowerCase();if(u===r)this.taskSuccess(d);else{this.taskFail();setTimeout(()=>i.focus(),500)}};c.onclick=ch;i.onkeydown=(e)=>{if(e.key==='Enter'){e.preventDefault();ch()}};a.appendChild(i);a.appendChild(document.createElement('br'));a.appendChild(c);setTimeout(()=>i.focus(),300)}
+            else if(MODE==='unscramble'){document.getElementById('lbl-question').innerText=lang.unscramble+":";let w=t.q.split(' ').sort(()=>.5-Math.random());let b=document.createElement('div');b.className='elt-word-bank';let tg=document.createElement('div');tg.className='elt-word-target';let c=document.createElement('button');c.className='elt-btn-main';c.innerText=lang.check;c.style.marginTop="10px";c.style.display="none";const u=()=>{c.style.display=(b.children.length===0)?"inline-block":"none"};w.forEach(wd=>{let we=document.createElement('div');we.className='elt-word';we.innerText=wd;we.onclick=()=>{if(we.parentElement===b)tg.appendChild(we);else b.appendChild(we);u()};b.appendChild(we)});c.onclick=()=>{let an=Array.from(tg.children).map(el=>el.innerText).join(' ');if(an===t.q)this.taskSuccess(d);else{this.taskFail();setTimeout(()=>{if(this.lives>0){while(tg.firstChild)b.appendChild(tg.firstChild);u()}},400)}};a.appendChild(tg);a.appendChild(b);a.appendChild(c)}
         },
-
-        move: function(dx, dy) {
-            if(!this.isPlaying) return;
-            this.moveX = dx; this.moveY = dy;
-            if(dx === -1) this.spideyEl.classList.add('flip');
-            if(dx === 1) this.spideyEl.classList.remove('flip');
-        },
-        stopMove: function() { this.moveX = 0; this.moveY = 0; },
-
-        triggerSpace: function() {
-            if(!this.isPlaying || !this.currentNearDot) return;
-            let dotObj = this.currentNearDot;
-            if(dotObj.done) return;
-            if(!dotObj.isReal) {
-                dotObj.done = true;
-                dotObj.el.classList.add('done');
-                this.hintEl.style.display = 'none';
-                return;
-            }
-            this.isPlaying = false;
-            this.stopMove();
-            this.hintEl.style.display = 'none';
-            this.openTask(dotObj.task, dotObj);
-        },
-
-        loop: function() {
-            if(!this.isPlaying) return;
-            if(this.moveX !== 0 || this.moveY !== 0) {
-                this.spideyX += this.moveX * 0.5;
-                this.spideyY += this.moveY * 0.5; 
-                if(this.spideyX < 25.5) this.spideyX = 25.5; 
-                if(this.spideyX > 48.5) this.spideyX = 48.5; 
-                if(this.spideyY < 17.5) this.spideyY = 17.5; 
-                if(this.spideyY > 95) this.spideyY = 95;
-                this.updateSpidey();
-                this.checkProximity();
-            }
-            requestAnimationFrame(() => this.loop());
-        },
-
-        updateSpidey: function() {
-            this.spideyEl.style.left = this.spideyX + '%';
-            this.spideyEl.style.top = this.spideyY + '%';
-            this.hintEl.style.left = this.spideyX + '%';
-            this.hintEl.style.top = this.spideyY + '%';
-        },
-
-        checkProximity: function() {
-            let foundNear = null;
-            this.allDots.forEach(dot => {
-                if(dot.done) return;
-                let dist = Math.hypot(this.spideyX - dot.x, this.spideyY - dot.y);
-                if(dist < 5) foundNear = dot;
-            });
-            this.currentNearDot = foundNear;
-            this.hintEl.style.display = foundNear ? 'block' : 'none';
-            if(this.tasksCompleted >= TASKS.length) this.win();
-        },
-
-        openTask: function(task, dotObj) {
-            this.boardTask.classList.remove('error-state');
-            this.boardTask.classList.add('show');
-            let ansBox = document.getElementById('box-answers');
-            ansBox.innerHTML = '';
-
-            if(MODE === 'discuss') {
-                document.getElementById('lbl-question').innerText = task.q;
-                let btn = document.createElement('button');
-                btn.className = 'elt-btn-main';
-                btn.innerText = lang.next;
-                btn.onclick = () => this.taskSuccess(dotObj);
-                ansBox.appendChild(btn);
-            } 
-            else if(MODE === 'quiz') {
-                document.getElementById('lbl-question').innerText = task.q;
-                let ansGrid = document.createElement('div');
-                ansGrid.className = 'elt-ans-grid';
-                let opts = [{t: task.c, corr: true}];
-                task.w.forEach(w => opts.push({t: w, corr: false}));
-                opts.sort(() => Math.random() - 0.5);
-                opts.forEach(opt => {
-                    let btn = document.createElement('button');
-                    btn.className = 'elt-btn-ans';
-                    btn.innerText = opt.t;
-                    btn.onclick = () => {
-                        if(opt.corr) this.taskSuccess(dotObj);
-                        else this.taskFail();
-                    };
-                    ansGrid.appendChild(btn);
-                });
-                ansBox.appendChild(ansGrid);
-            }
-            else if(MODE === 'fill') {
-                document.getElementById('lbl-question').innerText = task.q;
-                
-                let inp = document.createElement('input');
-                inp.type = 'text';
-                inp.className = 'elt-input-text';
-                inp.autocomplete = 'off';
-                inp.spellcheck = false;
-                
-                let checkBtn = document.createElement('button');
-                checkBtn.className = 'elt-btn-main';
-                checkBtn.innerText = lang.check;
-                
-                const checkAnswer = () => {
-                    let userAns = inp.value.trim().toLowerCase();
-                    let correctAns = task.c.trim().toLowerCase();
-                    if(userAns === correctAns) {
-                        this.taskSuccess(dotObj);
-                    } else {
-                        this.taskFail();
-                        setTimeout(() => inp.focus(), 500); 
-                    }
-                };
-
-                checkBtn.onclick = checkAnswer;
-                inp.onkeydown = (e) => {
-                    if(e.key === 'Enter') {
-                        e.preventDefault();
-                        checkAnswer();
-                    }
-                };
-
-                ansBox.appendChild(inp);
-                ansBox.appendChild(document.createElement('br'));
-                ansBox.appendChild(checkBtn);
-                
-                setTimeout(() => inp.focus(), 300); 
-            }
-            else if(MODE === 'unscramble') {
-                document.getElementById('lbl-question').innerText = lang.unscramble + ":";
-                let words = task.q.split(' ').sort(() => Math.random() - 0.5);
-                let bank = document.createElement('div');
-                bank.className = 'elt-word-bank';
-                let target = document.createElement('div');
-                target.className = 'elt-word-target';
-                
-                let checkBtn = document.createElement('button');
-                checkBtn.className = 'elt-btn-main';
-                checkBtn.innerText = lang.check;
-                checkBtn.style.marginTop = "10px";
-                checkBtn.style.display = "none";
-
-                const updateBtn = () => { checkBtn.style.display = (bank.children.length === 0) ? "inline-block" : "none"; };
-
-                words.forEach(w => {
-                    let wEl = document.createElement('div');
-                    wEl.className = 'elt-word';
-                    wEl.innerText = w;
-                    wEl.onclick = () => {
-                        if(wEl.parentElement === bank) target.appendChild(wEl);
-                        else bank.appendChild(wEl);
-                        updateBtn();
-                    };
-                    bank.appendChild(wEl);
-                });
-
-                checkBtn.onclick = () => {
-                    let userAns = Array.from(target.children).map(el => el.innerText).join(' ');
-                    if(userAns === task.q) {
-                        this.taskSuccess(dotObj);
-                    } else {
-                        this.taskFail();
-                        setTimeout(() => {
-                            if(this.lives > 0) {
-                                while(target.firstChild) bank.appendChild(target.firstChild);
-                                updateBtn();
-                            }
-                        }, 400);
-                    }
-                };
-
-                ansBox.appendChild(target);
-                ansBox.appendChild(bank);
-                ansBox.appendChild(checkBtn);
-            }
-        },
-
-        createShatterEffect: function() {
-            let cx = this.boardTask.offsetLeft + this.boardTask.offsetWidth / 2;
-            let cy = this.boardTask.offsetTop + this.boardTask.offsetHeight / 2;
-            let colors = ['#1a1a1a', '#cccccc', '#e50914', '#ffd700'];
-            for(let i=0; i<35; i++) {
-                let p = document.createElement('div');
-                p.className = 'elt-fragment';
-                let angle = (Math.random() * 360) * Math.PI / 180;
-                let dist = 100 + Math.random() * 250; 
-                p.style.setProperty('--tx', (Math.cos(angle) * dist) + 'px');
-                p.style.setProperty('--ty', (Math.sin(angle) * dist) + 'px');
-                p.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
-                p.style.left = cx + 'px';
-                p.style.top = cy + 'px';
-                p.style.background = colors[Math.floor(Math.random() * colors.length)];
-                p.style.width = (5 + Math.random() * 15) + 'px';
-                p.style.height = p.style.width;
-                this.appArea.appendChild(p);
-                setTimeout(() => p.remove(), 800);
-            }
-        },
-
-        taskSuccess: function(dotObj) {
-            this.boardTask.classList.add('exploding');
-            this.createShatterEffect();
-            dotObj.done = true;
-            dotObj.el.classList.add('done');
-            this.tasksCompleted++;
-            
-            // Восстанавливаем фокус после закрытия окна с заданием
-            window.focus();
-            this.appArea.focus();
-            
-            setTimeout(() => {
-                this.boardTask.classList.remove('show');
-                this.boardTask.classList.remove('exploding');
-                this.isPlaying = true;
-                this.loop();
-                this.checkProximity(); 
-            }, 600);
-        },
-
-        taskFail: function() {
-            this.lives--;
-            this.updateLives();
-            if(this.lives <= 0) {
-                // Если проиграли - ВЫКЛЮЧАЕМ захват фокуса (чтобы можно было уйти на другой слайд)
-                this.isActive = false;
-                clearInterval(this.focusInterval);
-                this.boardTask.classList.remove('show');
-                setTimeout(() => document.getElementById('screen-over').classList.remove('elt-hidden'), 500);
-            } else {
-                this.boardTask.classList.remove('error-state');
-                void this.boardTask.offsetWidth; 
-                this.boardTask.classList.add('error-state');
-                setTimeout(() => {
-                    this.boardTask.classList.remove('error-state');
-                }, 500);
-            }
-        },
-
-        win: function() {
-            // Если победили - ВЫКЛЮЧАЕМ захват фокуса
-            this.isPlaying = false;
-            this.isActive = false;
-            clearInterval(this.focusInterval);
-            
-            document.getElementById('screen-win').classList.remove('elt-hidden');
-            let winScreen = document.getElementById('screen-win');
-            this.fwInterval = setInterval(() => {
-                let spark = document.createElement('div');
-                spark.className = 'elt-gold-spark';
-                spark.style.left = (10 + Math.random() * 80) + '%';
-                spark.style.top = (10 + Math.random() * 80) + '%';
-                winScreen.appendChild(spark);
-                setTimeout(() => spark.remove(), 1000);
-            }, 100);
-        }
+        createShatterEffect:function(){let x=this.boardTask.offsetLeft+this.boardTask.offsetWidth/2,y=this.boardTask.offsetTop+this.boardTask.offsetHeight/2,c=['#1a1a1a','#ccc','#e50914','#ffd700'];for(let i=0;i<35;i++){let p=document.createElement('div');p.className='elt-fragment';let a=(Math.random()*360)*Math.PI/180,d=100+Math.random()*250;p.style.setProperty('--tx',(Math.cos(a)*d)+'px');p.style.setProperty('--ty',(Math.sin(a)*d)+'px');p.style.setProperty('--rot',(Math.random()*720-360)+'deg');p.style.left=x+'px';p.style.top=y+'px';p.style.background=c[Math.floor(Math.random()*c.length)];p.style.width=(5+Math.random()*15)+'px';p.style.height=p.style.width;this.appArea.appendChild(p);setTimeout(()=>p.remove(),800)}},
+        taskSuccess:function(d){this.boardTask.classList.add('exploding');this.createShatterEffect();d.done=true;d.el.classList.add('done');this.tasksCompleted++;window.focus();this.appArea.focus();setTimeout(()=>{this.boardTask.classList.remove('show','exploding');this.isPlaying=true;this.loop();this.checkProximity()},600)},
+        taskFail:function(){this.lives--;this.updateLives();if(this.lives<=0){this.isActive=false;clearInterval(this.focusInterval);this.boardTask.classList.remove('show');setTimeout(()=>document.getElementById('screen-over').classList.remove('elt-hidden'),500)}else{this.boardTask.classList.remove('error-state');void this.boardTask.offsetWidth;this.boardTask.classList.add('error-state');setTimeout(()=>this.boardTask.classList.remove('error-state'),500)}},
+        win:function(){this.isPlaying=false;this.isActive=false;clearInterval(this.focusInterval);document.getElementById('screen-win').classList.remove('elt-hidden');let w=document.getElementById('screen-win');this.fwInterval=setInterval(()=>{let s=document.createElement('div');s.className='elt-gold-spark';s.style.left=(10+Math.random()*80)+'%';s.style.top=(10+Math.random()*80)+'%';w.appendChild(s);setTimeout(()=>s.remove(),1e3)},100)}
     };
-
-    window.game = game; 
-    game.init();
+    window.game = game; game.init();
 })();
 <\/script>
 </div>
