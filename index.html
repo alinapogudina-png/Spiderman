@@ -9,6 +9,8 @@
         body { font-family: 'Poppins', sans-serif; background-color: #1a1a2e; color: #e0e0e0; display: flex; padding: 20px; gap: 30px; height: 100vh; margin: 0; box-sizing: border-box; }
         .editor-panel, .preview-panel { background-color: #16213e; padding: 25px; border-radius: 15px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); }
         .editor-panel { width: 45%; display: flex; flex-direction: column; overflow-y: auto; }
+        .editor-panel::-webkit-scrollbar { width: 6px; }
+        .editor-panel::-webkit-scrollbar-thumb { background: #535c91; border-radius: 3px; }
         .preview-panel { width: 55%; display: flex; flex-direction: column; position: relative; padding-bottom: 40px;}
         
         h1, h2 { color: #e50914; font-weight: 700; letter-spacing: 1px; font-size: 28px; margin-top: 0; text-align: center; }
@@ -33,8 +35,8 @@
         .upload-btn:hover { background: #535c91; }
 
         #previewFrame { width: 100%; flex: 1; border: 2px solid #535c91; border-radius: 10px; background-color: #000; }
-        button.gen-btn { background: #e50914; color: #fff; padding: 15px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700; transition: 0.2s; letter-spacing: 1px;}
-        button.gen-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(229, 9, 20, 0.6); }
+        button { background: #e50914; color: #fff; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 700; transition: 0.2s; letter-spacing: 1px;}
+        button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(229, 9, 20, 0.6); }
         
         #generated-code { height: 100px; margin-top: 10px; color: #a7d129; font-family: monospace; font-size: 11px;}
         .copyright { position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; font-size: 12px; color: rgba(255, 255, 255, 0.5); }
@@ -121,7 +123,14 @@
             </div>
         </div>
         
-        <button class="gen-btn" id="copyBtn" onclick="copyCode()" style="width: 100%; margin-top:20px;">СГЕНЕРИРОВАТЬ И СКОПИРОВАТЬ</button>
+        <div class="flex-row" style="margin-top:15px; gap:10px;">
+            <button onclick="saveProject()" style="flex:1; background: linear-gradient(90deg, #a1c4fd, #c2e9fb); color: #1a1a2e;">Сохранить проект</button>
+            <button onclick="document.getElementById('file-project').click()" style="flex:1; background: linear-gradient(90deg, #84fab0, #8fd3f4); color: #1a1a2e;">Загрузить проект</button>
+        </div>
+        <div class="flex-row" style="margin-top:10px; gap:10px;">
+            <button id="copyBtn" onclick="copyCode()" style="flex:1;">Скопировать HTML</button>
+            <button id="copyIframeBtn" onclick="copyIframeCode()" style="flex:1; background: linear-gradient(90deg, #fbc2eb, #a6c1ee); color: #1a1a2e;">Скопировать iframe (для Genially)</button>
+        </div>
         <textarea id="generated-code" readonly placeholder="Здесь появится готовый код..."></textarea>
     </div>
 
@@ -135,6 +144,7 @@
     <input type="file" id="file-spider" accept="image/*" style="display:none;">
     <input type="file" id="file-win" accept="image/*" style="display:none;">
     <input type="file" id="file-lose" accept="image/*" style="display:none;">
+    <input type="file" id="file-project" accept=".json" style="display:none;">
 
     <script>
         function fileToBase64(file, callback) {
@@ -160,6 +170,77 @@
         setupImageUpload('file-win', 'imgWin');
         setupImageUpload('file-lose', 'imgLose');
 
+        document.getElementById('file-project').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.uiLang !== undefined) document.getElementById('uiLang').value = data.uiLang;
+                    if (data.gameTitle !== undefined) document.getElementById('gameTitle').value = data.gameTitle;
+                    if (data.fontFamily !== undefined) document.getElementById('fontFamily').value = data.fontFamily;
+                    if (data.fontColor !== undefined) document.getElementById('fontColor').value = data.fontColor;
+                    if (data.fontSize !== undefined) {
+                        document.getElementById('fontSize').value = data.fontSize;
+                        document.getElementById('fSizeLbl').innerText = data.fontSize;
+                    }
+                    if (data.gameMode !== undefined) {
+                        document.getElementById('gameMode').value = data.gameMode;
+                        toggleTaskInputs();
+                    }
+                    if (data.qList !== undefined) document.getElementById('qList').value = data.qList;
+                    if (data.aList !== undefined) document.getElementById('aList').value = data.aList;
+                    if (data.simpleList !== undefined) document.getElementById('simpleList').value = data.simpleList;
+                    if (data.fillQList !== undefined) document.getElementById('fillQList').value = data.fillQList;
+                    if (data.fillAList !== undefined) document.getElementById('fillAList').value = data.fillAList;
+                    if (data.imgSpider !== undefined) document.getElementById('imgSpider').value = data.imgSpider;
+                    if (data.imgWin !== undefined) document.getElementById('imgWin').value = data.imgWin;
+                    if (data.imgLose !== undefined) document.getElementById('imgLose').value = data.imgLose;
+                    if (data.winText !== undefined) document.getElementById('winText').value = data.winText;
+                    if (data.loseText !== undefined) document.getElementById('loseText').value = data.loseText;
+
+                    debounceGenerate();
+                    event.target.value = '';
+                } catch (err) {
+                    alert('Ошибка при чтении файла проекта: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        function saveProject() {
+            const projectData = {
+                uiLang: document.getElementById('uiLang').value,
+                gameTitle: document.getElementById('gameTitle').value,
+                fontFamily: document.getElementById('fontFamily').value,
+                fontColor: document.getElementById('fontColor').value,
+                fontSize: document.getElementById('fontSize').value,
+                gameMode: document.getElementById('gameMode').value,
+                qList: document.getElementById('qList').value,
+                aList: document.getElementById('aList').value,
+                simpleList: document.getElementById('simpleList').value,
+                fillQList: document.getElementById('fillQList').value,
+                fillAList: document.getElementById('fillAList').value,
+                imgSpider: document.getElementById('imgSpider').value,
+                imgWin: document.getElementById('imgWin').value,
+                imgLose: document.getElementById('imgLose').value,
+                winText: document.getElementById('winText').value,
+                loseText: document.getElementById('loseText').value
+            };
+
+            const jsonStr = JSON.stringify(projectData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = (projectData.gameTitle.trim() || 'spiderman_game') + '_project.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         function toggleTaskInputs() {
             let mode = document.getElementById('gameMode').value;
             document.getElementById('input-quiz').style.display = mode === 'quiz' ? 'block' : 'none';
@@ -170,10 +251,29 @@
         function getInputs() {
             let mode = document.getElementById('gameMode').value;
             let tasks = [];
-            if(mode === 'quiz') { let q=document.getElementById('qList').value.split('\n').map(s=>s.trim()).filter(s=>s),a=document.getElementById('aList').value.split('\n').map(s=>s.trim()).filter(s=>s); for(let i=0; i<Math.min(q.length, a.length); i++) { let p=a[i].split('|').map(s=>s.trim()).filter(s=>s); if(p.length>0) tasks.push({q:q[i],c:p[0],w:p.slice(1)}); }}
-            else if (mode === 'fill') { let q=document.getElementById('fillQList').value.split('\n').map(s=>s.trim()).filter(s=>s),a=document.getElementById('fillAList').value.split('\n').map(s=>s.trim()).filter(s=>s); for(let i=0; i<Math.min(q.length,a.length); i++) tasks.push({q:q[i],c:a[i]}); }
-            else { document.getElementById('simpleList').value.split('\n').map(s=>s.trim()).filter(s=>s).forEach(l=>tasks.push({q:l}));}
-            if(tasks.length===0) tasks=[{q:"No tasks configured!", c:"Ok", w:[]}];
+            if(mode === 'quiz') { 
+                let q = document.getElementById('qList').value.split('\n').map(s=>s.trim()).filter(s=>s);
+                let a = document.getElementById('aList').value.split('\n').map(s=>s.trim()).filter(s=>s); 
+                for(let i=0; i<Math.min(q.length, a.length); i++) { 
+                    let p = a[i].split('|').map(s=>s.trim()).filter(s=>s); 
+                    if(p.length > 0) {
+                        if (p.length === 1) {
+                            tasks.push({q: q[i], c: p[0], mode: 'fill'});
+                        } else {
+                            tasks.push({q: q[i], c: p[0], w: p.slice(1), mode: 'quiz'});
+                        }
+                    } 
+                }
+            }
+            else if (mode === 'fill') { 
+                let q = document.getElementById('fillQList').value.split('\n').map(s=>s.trim()).filter(s=>s);
+                let a = document.getElementById('fillAList').value.split('\n').map(s=>s.trim()).filter(s=>s); 
+                for(let i=0; i<Math.min(q.length,a.length); i++) tasks.push({q:q[i],c:a[i],mode:'fill'}); 
+            }
+            else { 
+                document.getElementById('simpleList').value.split('\n').map(s=>s.trim()).filter(s=>s).forEach(l=>tasks.push({q:l,mode:mode}));
+            }
+            if(tasks.length===0) tasks=[{q:"No tasks configured!", c:"Ok", w:[], mode:'quiz'}];
 
             return {
                 lang: document.getElementById('uiLang').value,
@@ -281,7 +381,7 @@
     const dict = { EN: { start: "START", try: "RESTART", check: "CHECK", next: "NEXT", unscramble: "Put the words in the right order", playagain: "PLAY AGAIN" }, RU: { start: "ИГРАТЬ", try: "ЗАНОВО", check: "ПРОВЕРИТЬ", next: "ДАЛЕЕ", unscramble: "Расставьте слова в правильном порядке", playagain: "ИГРАТЬ ЕЩЕ РАЗ" }, ES: { start: "JUGAR", try: "REINICIAR", check: "COMPROBAR", next: "SIGUIENTE", unscramble: "Pon las palabras en el orden correcto", playagain: "JUGAR DE NUEVO" }, FR: { start: "JOUER", try: "RECOMMENCER", check: "VÉRIFIER", next: "SUIVANT", unscramble: "Mettez les mots dans le bon ordre", playagain: "REJOUER" }, DE: { start: "START", try: "NEUSTART", check: "PRÜFEN", next: "WEITER", unscramble: "Bringen Sie die Wörter in die richtige Reihenfolge", playagain: "NOCHMAL SPIELEN" }, IT: { start: "INIZIA", try: "RIAVVIA", check: "CONTROLLA", next: "AVANTI", unscramble: "Metti le parole nel giusto ordine", playagain: "GIOCA DI NUOVO" }};
     const lang = dict['${conf.lang}'] || dict.EN;
     document.getElementById('btn-start').innerText=lang.start; document.getElementById('btn-try').innerText=lang.try; document.getElementById('btn-win-restart').innerText=lang.playagain;
-    const MODE = '${conf.mode}'; const TASKS = ${JSON.stringify(conf.tasks)};
+    const TASKS = ${JSON.stringify(conf.tasks)};
     const GRID = [{x:28.5,y:18.5},{x:38,y:18.5},{x:46.5,y:18.5},{x:28.5,y:34},{x:38,y:34},{x:46.5,y:34},{x:28.5,y:50.5},{x:38,y:50.5},{x:46.5,y:50.5},{x:28.5,y:67.5},{x:38,y:67.5},{x:46.5,y:67.5},{x:28.5,y:83.5},{x:38,y:83.5},{x:46.5,y:83.5}];
     const game = {
         lives:3,isPlaying:false,isActive:false,tasksCompleted:0,spideyX:38,spideyY:95,moveX:0,moveY:0,fwInterval:null,focusInterval:null,allDots:[],currentNearDot:null,
@@ -313,10 +413,11 @@
         checkProximity:function(){let f=null;this.allDots.forEach(d=>{if(d.done)return;let t=Math.hypot(this.spideyX-d.x,this.spideyY-d.y);if(t<5)f=d});this.currentNearDot=f;this.hintEl.style.display=f?'block':'none';if(this.tasksCompleted>=TASKS.length)this.win()},
         openTask:function(t,d){
             this.boardTask.classList.remove('error-state');this.boardTask.classList.add('show');let a=document.getElementById('box-answers');a.innerHTML='';
-            if(MODE==='discuss'){document.getElementById('lbl-question').innerText=t.q;let b=document.createElement('button');b.className='elt-btn-main';b.innerText=lang.next;b.onclick=()=>this.taskSuccess(d);a.appendChild(b)}
-            else if(MODE==='quiz'){document.getElementById('lbl-question').innerText=t.q;let g=document.createElement('div');g.className='elt-ans-grid';let o=[{t:t.c,corr:true}];t.w.forEach(w=>o.push({t:w,corr:false}));o.sort(()=>.5-Math.random());o.forEach(opt=>{let b=document.createElement('button');b.className='elt-btn-ans';b.innerText=opt.t;b.onclick=()=>{if(opt.corr)this.taskSuccess(d);else this.taskFail()};g.appendChild(b)});a.appendChild(g)}
-            else if(MODE==='fill'){document.getElementById('lbl-question').innerText=t.q;let i=document.createElement('input');i.type='text';i.className='elt-input-text';i.autocomplete='off';i.spellcheck=false;let c=document.createElement('button');c.className='elt-btn-main';c.innerText=lang.check;const ch=()=>{let u=i.value.trim().toLowerCase(),r=t.c.trim().toLowerCase();if(u===r)this.taskSuccess(d);else{this.taskFail();setTimeout(()=>i.focus(),500)}};c.onclick=ch;i.onkeydown=(e)=>{if(e.key==='Enter'){e.preventDefault();ch()}};a.appendChild(i);a.appendChild(document.createElement('br'));a.appendChild(c);setTimeout(()=>i.focus(),300)}
-            else if(MODE==='unscramble'){document.getElementById('lbl-question').innerText=lang.unscramble+":";let w=t.q.split(' ').sort(()=>.5-Math.random());let b=document.createElement('div');b.className='elt-word-bank';let tg=document.createElement('div');tg.className='elt-word-target';let c=document.createElement('button');c.className='elt-btn-main';c.innerText=lang.check;c.style.marginTop="10px";c.style.display="none";const u=()=>{c.style.display=(b.children.length===0)?"inline-block":"none"};w.forEach(wd=>{let we=document.createElement('div');we.className='elt-word';we.innerText=wd;we.onclick=()=>{if(we.parentElement===b)tg.appendChild(we);else b.appendChild(we);u()};b.appendChild(we)});c.onclick=()=>{let an=Array.from(tg.children).map(el=>el.innerText).join(' ');if(an===t.q)this.taskSuccess(d);else{this.taskFail();setTimeout(()=>{if(this.lives>0){while(tg.firstChild)b.appendChild(tg.firstChild);u()}},400)}};a.appendChild(tg);a.appendChild(b);a.appendChild(c)}
+            let curMode = t.mode || '${conf.mode}';
+            if(curMode==='discuss'){document.getElementById('lbl-question').innerText=t.q;let b=document.createElement('button');b.className='elt-btn-main';b.innerText=lang.next;b.onclick=()=>this.taskSuccess(d);a.appendChild(b)}
+            else if(curMode==='quiz'){document.getElementById('lbl-question').innerText=t.q;let g=document.createElement('div');g.className='elt-ans-grid';let o=[{t:t.c,corr:true}];t.w.forEach(w=>o.push({t:w,corr:false}));o.sort(()=>.5-Math.random());o.forEach(opt=>{let b=document.createElement('button');b.className='elt-btn-ans';b.innerText=opt.t;b.onclick=()=>{if(opt.corr)this.taskSuccess(d);else this.taskFail()};g.appendChild(b)});a.appendChild(g)}
+            else if(curMode==='fill'){document.getElementById('lbl-question').innerText=t.q;let i=document.createElement('input');i.type='text';i.className='elt-input-text';i.autocomplete='off';i.spellcheck=false;let c=document.createElement('button');c.className='elt-btn-main';c.innerText=lang.check;const ch=()=>{let u=i.value.trim().toLowerCase(),r=t.c.trim().toLowerCase();if(u===r)this.taskSuccess(d);else{this.taskFail();setTimeout(()=>i.focus(),500)}};c.onclick=ch;i.onkeydown=(e)=>{if(e.key==='Enter'){e.preventDefault();ch()}};a.appendChild(i);a.appendChild(document.createElement('br'));a.appendChild(c);setTimeout(()=>i.focus(),300)}
+            else if(curMode==='unscramble'){document.getElementById('lbl-question').innerText=lang.unscramble+":";let w=t.q.split(' ').sort(()=>.5-Math.random());let b=document.createElement('div');b.className='elt-word-bank';let tg=document.createElement('div');tg.className='elt-word-target';let c=document.createElement('button');c.className='elt-btn-main';c.innerText=lang.check;c.style.marginTop="10px";c.style.display="none";const u=()=>{c.style.display=(b.children.length===0)?"inline-block":"none"};w.forEach(wd=>{let we=document.createElement('div');we.className='elt-word';we.innerText=wd;we.onclick=()=>{if(we.parentElement===b)tg.appendChild(we);else b.appendChild(we);u()};b.appendChild(we)});c.onclick=()=>{let an=Array.from(tg.children).map(el=>el.innerText).join(' ');if(an===t.q)this.taskSuccess(d);else{this.taskFail();setTimeout(()=>{if(this.lives>0){while(tg.firstChild)b.appendChild(tg.firstChild);u()}},400)}};a.appendChild(tg);a.appendChild(b);a.appendChild(c)}
         },
         createShatterEffect:function(){let x=this.boardTask.offsetLeft+this.boardTask.offsetWidth/2,y=this.boardTask.offsetTop+this.boardTask.offsetHeight/2,c=['#1a1a1a','#ccc','#e50914','#ffd700'];for(let i=0;i<35;i++){let p=document.createElement('div');p.className='elt-fragment';let a=(Math.random()*360)*Math.PI/180,d=100+Math.random()*250;p.style.setProperty('--tx',(Math.cos(a)*d)+'px');p.style.setProperty('--ty',(Math.sin(a)*d)+'px');p.style.setProperty('--rot',(Math.random()*720-360)+'deg');p.style.left=x+'px';p.style.top=y+'px';p.style.background=c[Math.floor(Math.random()*c.length)];p.style.width=(5+Math.random()*15)+'px';p.style.height=p.style.width;this.appArea.appendChild(p);setTimeout(()=>p.remove(),800)}},
         taskSuccess:function(d){this.boardTask.classList.add('exploding');this.createShatterEffect();d.done=true;d.el.classList.add('done');this.tasksCompleted++;window.focus();this.appArea.focus();setTimeout(()=>{this.boardTask.classList.remove('show','exploding');this.isPlaying=true;this.loop();this.checkProximity()},600)},
@@ -342,9 +443,25 @@
             btn.innerText = 'СКОПИРОВАНО!';
             btn.style.background = '#2ecc71';
             setTimeout(() => { 
-                btn.innerText = 'СГЕНЕРИРОВАТЬ И СКОПИРОВАТЬ'; 
+                btn.innerText = 'Скопировать HTML'; 
                 btn.style.background = '#e50914';
             }, 2000);
+        }
+
+        function copyIframeCode() {
+            generateCode();
+            const htmlCode = document.getElementById('generated-code').value;
+            const iframeCode = `<iframe srcdoc="${htmlCode.replace(/"/g, '&quot;')}" width="100%" height="600" frameborder="0" allowfullscreen style="width: 100%; height: 600px; border: none;"></iframe>`;
+            
+            const tempArea = document.createElement('textarea');
+            tempArea.value = iframeCode;
+            document.body.appendChild(tempArea);
+            tempArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempArea);
+
+            const btn = document.getElementById('copyIframeBtn'); btn.innerText = 'iframe скопирован!'; btn.style.background = '#2ecc71';
+            setTimeout(() => { btn.innerText = 'Скопировать iframe (для Genially)'; btn.style.background = 'linear-gradient(90deg, #fbc2eb, #a6c1ee)'; }, 2000);
         }
 
         let previewTimeout;
