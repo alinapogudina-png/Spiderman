@@ -128,7 +128,7 @@
             <button onclick="document.getElementById('file-project').click()" style="flex:1; background: linear-gradient(90deg, #84fab0, #8fd3f4); color: #1a1a2e;">Загрузить проект</button>
         </div>
         <div class="flex-row" style="margin-top:10px; gap:10px;">
-            <button id="copyBtn" onclick="copyCode()" style="flex:1;">Скопировать HTML</button>
+            <button id="downloadHtmlBtn" onclick="downloadHtmlFile()" style="flex:1;">Скачать HTML файл</button>
             <button id="copyIframeBtn" onclick="copyIframeCode()" style="flex:1; background: linear-gradient(90deg, #fbc2eb, #a6c1ee); color: #1a1a2e;">Скопировать iframe (для Genially)</button>
         </div>
         <textarea id="generated-code" readonly placeholder="Здесь появится готовый код..."></textarea>
@@ -375,7 +375,7 @@
     <div class="elt-task-board" id="board-task"><div class="elt-question" id="lbl-question"></div><div id="box-answers"></div></div>
     <div id="screen-start"><div class="elt-title-huge">${conf.title}</div><button class="elt-btn-huge" id="btn-start"></button></div>
     <div id="screen-over" class="elt-hidden"><img src="${conf.imgLose}" class="elt-lose-img"><div class="elt-lose-text">${conf.loseText}</div><button class="elt-btn-main" id="btn-try"></button></div>
-    <div id="screen-win" class="elt-hidden"><img src="${conf.imgWin}" class="elt-win-img"><div class="elt-win-text">${conf.winText}</div><button class="elt-btn-main" id="btn-win-restart" style="position:relative;z-index:10;"></button></div>
+    <div id="screen-win" class="elt-hidden"><img src="${conf.imgWin}" class="elt-win-img"><div class="elt-lose-text" style="color:#ffd700">${conf.winText}</div><button class="elt-btn-main" id="btn-win-restart" style="position:relative;z-index:10;"></button></div>
 <script>
 (function(){
     const dict = { EN: { start: "START", try: "RESTART", check: "CHECK", next: "NEXT", unscramble: "Put the words in the right order", playagain: "PLAY AGAIN" }, RU: { start: "ИГРАТЬ", try: "ЗАНОВО", check: "ПРОВЕРИТЬ", next: "ДАЛЕЕ", unscramble: "Расставьте слова в правильном порядке", playagain: "ИГРАТЬ ЕЩЕ РАЗ" }, ES: { start: "JUGAR", try: "REINICIAR", check: "COMPROBAR", next: "SIGUIENTE", unscramble: "Pon las palabras en el orden correcto", playagain: "JUGAR DE NUEVO" }, FR: { start: "JOUER", try: "RECOMMENCER", check: "VÉRIFIER", next: "SUIVANT", unscramble: "Mettez les mots dans le bon ordre", playagain: "REJOUER" }, DE: { start: "START", try: "NEUSTART", check: "PRÜFEN", next: "WEITER", unscramble: "Bringen Sie die Wörter in die richtige Reihenfolge", playagain: "NOCHMAL SPIELEN" }, IT: { start: "INIZIA", try: "RIAVVIA", check: "CONTROLLA", next: "AVANTI", unscramble: "Metti le parole nel giusto ordine", playagain: "GIOCA DI NUOVO" }};
@@ -434,16 +434,24 @@
             document.getElementById('previewFrame').srcdoc = safeHtmlCode;
         }
 
-        function copyCode() {
+        function downloadHtmlFile() {
             generateCode(); 
-            const codeArea = document.getElementById('generated-code');
-            codeArea.select();
-            document.execCommand('copy');
-            const btn = document.getElementById('copyBtn');
-            btn.innerText = 'СКОПИРОВАНО!';
+            const htmlContent = document.getElementById('previewFrame').srcdoc;
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = (document.getElementById('gameTitle').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '_') || 'spiderman_game') + '.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            const btn = document.getElementById('downloadHtmlBtn');
+            btn.innerText = 'ФАЙЛ СКАЧАН!';
             btn.style.background = '#2ecc71';
             setTimeout(() => { 
-                btn.innerText = 'Скопировать HTML'; 
+                btn.innerText = 'Скачать HTML файл'; 
                 btn.style.background = '#e50914';
             }, 2000);
         }
@@ -461,7 +469,7 @@
             document.body.removeChild(tempArea);
 
             const btn = document.getElementById('copyIframeBtn'); btn.innerText = 'iframe скопирован!'; btn.style.background = '#2ecc71';
-            setTimeout(() => { btn.innerText = 'Скопировать iframe (для Genially)'; btn.style.background = 'linear-gradient(90deg, #fbc2eb, #a6c1ee)'; }, 2000);
+            setTimeout(() => { btn.innerText = 'Скопировать iframe (для Genially)'; btn.style.background = 'linear-gradient(90deg, #fbc2eb, #a6c1ee); color: #1a1a2e;'; }, 2000);
         }
 
         let previewTimeout;
